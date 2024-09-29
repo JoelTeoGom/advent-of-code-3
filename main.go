@@ -65,10 +65,15 @@ func find(sum *int, i, j, rows, col int, matrix [][]string) {
 			if (r < rows) && (c < col) {
 				if matrix[r][c] >= "0" && matrix[r][c] <= "9" {
 					fmt.Printf("Matrix[%d][%d] = %s \n", r, c, matrix[r][c])
-					r, c = findNumber(i, j, r, c, rows, col, matrix, sum)
-					if r == -1 && c == -1 {
+					newr, newc := findNumber(i, j, r, c, rows, col, matrix, sum)
+					if newr != -1 && newc == -1 {
+						//fmt.Println("SALTO DE LINEA", newr)
+						break
+					}
+					if newr == -1 && newc == -1 {
 						return
 					}
+					newr, newc = r, c
 				}
 			}
 		}
@@ -92,6 +97,7 @@ func findNumber(symbolX, symbolY, currentX, currentY, maxRows, maxCol int, matri
 	}
 
 	// right
+
 	var i int
 	for i = currentY + 1; i < maxCol; i++ {
 		if matrix[currentX][i] >= "0" && matrix[currentX][i] <= "9" {
@@ -103,24 +109,23 @@ func findNumber(symbolX, symbolY, currentX, currentY, maxRows, maxCol int, matri
 
 	//Convert form string[] to string to int
 	numberStr := strings.Join(number, "")
-	fmt.Println(numberStr)
+
 	if n, err := strconv.Atoi(numberStr); err == nil {
+		fmt.Println("MATRIX : ", n)
 		*sum += n
+
 	} else {
 		fmt.Println("Error al convertir a número:", err)
 	}
 
 	//update current X and Y
 	//check if updated X and Y are valid
-	if i <= (symbolY + 1) {
-		return currentX, i
-	}
+	currentY = i
 
-	currentY = symbolY - 1
-	currentX = currentX + 1
-
+	//fmt.Println("currentY : ", currentY)
+	currentY = -1
+	//fmt.Println("currentY : ", currentY)
 	if currentX > symbolX+1 {
-
 		return -1, -1
 	}
 
