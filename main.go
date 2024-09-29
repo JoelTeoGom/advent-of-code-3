@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -19,7 +20,6 @@ func main() {
 	scanner := bufio.NewScanner(file)
 
 	m := make([][]string, 0)
-	symbols := make([]string, 0)
 
 	rows := 0
 	var i int
@@ -31,19 +31,13 @@ func main() {
 		i = 0
 		for col, char := range line {
 			m[rows][col] = string(char)
-			if (char < '0' || char > '9') && char != '.' {
-				symbol := string(char)
-				if !contains(symbols, symbol) {
-					symbols = append(symbols, string(char))
-				}
-			}
 			i++
 
 		}
 
 		rows++
 	}
-	fmt.Println(symbols)
+
 	fmt.Println(i)
 	fmt.Println(len(m))
 
@@ -53,7 +47,9 @@ func main() {
 	for i := 0; i < rows; i++ {
 		for j := 0; j < col; j++ {
 			if (m[i][j] < "0" || m[i][j] > "9") && m[i][j] != "." {
+				fmt.Printf("matrix[%d][%d]: %s \n", i, j, m[i][j])
 				find(&sum, i, j, rows, col, m)
+				fmt.Println("==============================")
 			}
 		}
 	}
@@ -62,23 +58,58 @@ func main() {
 }
 
 func find(sum *int, i, j, rows, col int, matrix [][]string) {
-	for r := i - 1; r < i+1; r++ {
-		for c := j - 1; c < j+1; c++ {
+	for r := i - 1; r <= i+1; r++ {
+		for c := j - 1; c <= j+1; c++ {
+
 			if (r < rows) && (c < col) {
-				fmt.Printf("Matrix[%d][%d] = %s \n", r, c, matrix[r][c])
-				if matrix[r][c] > "0" && matrix[r][c] < "9" {
-					number, err := strconv.Atoi(matrix[r][c])
-					if err != nil {
-						fmt.Println("Error :", err)
-						return
-					}
-					*sum += number
+				if matrix[r][c] >= "0" && matrix[r][c] <= "9" {
+					fmt.Printf("Matrix[%d][%d] = %s \n", r, c, matrix[r][c])
+					newI, newJ := findNumber(i, j, rows, col, matrix, sum)
+					i, j = newI, newJ
 				}
 			}
+			fmt.Println(i, j)
 		}
 
 	}
 
+}
+
+func findNumber(currentX, currentY, maxRows, maxCol int, matrix [][]string, sum *int) (int, int) {
+
+	number := make([]string, 0) // Cambiamos a []string
+
+	// left
+	for i := currentY; i >= 0; i-- {
+		if matrix[currentX][i] >= "0" && matrix[currentX][i] <= "9" {
+			number = append([]string{matrix[currentX][i]}, number...)
+			fmt.Println(number)
+		} else {
+			break
+		}
+	}
+
+	// right
+	for i := currentY + 1; i < maxCol; i++ {
+		if matrix[currentX][i] >= "0" && matrix[currentX][i] <= "9" {
+			number = append(number, matrix[currentX][i])
+			fmt.Println(number)
+		} else {
+			break
+		}
+	}
+
+	// Concatenamos los elementos del slice de strings
+	numberStr := strings.Join(number, "")
+	//fmt.Println(numberStr)
+	// Convertimos el string concatenado a un entero
+	if n, err := strconv.Atoi(numberStr); err == nil {
+		*sum += n
+	} else {
+		//fmt.Println("Error al convertir a número:", err)
+	}
+
+	return currentX, currentY
 }
 
 func contains(slice []string, item string) bool {
