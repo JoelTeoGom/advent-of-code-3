@@ -58,24 +58,26 @@ func main() {
 }
 
 func find(sum *int, i, j, rows, col int, matrix [][]string) {
+
 	for r := i - 1; r <= i+1; r++ {
 		for c := j - 1; c <= j+1; c++ {
 
 			if (r < rows) && (c < col) {
 				if matrix[r][c] >= "0" && matrix[r][c] <= "9" {
 					fmt.Printf("Matrix[%d][%d] = %s \n", r, c, matrix[r][c])
-					newI, newJ := findNumber(i, j, rows, col, matrix, sum)
-					i, j = newI, newJ
+					r, c = findNumber(i, j, r, c, rows, col, matrix, sum)
+					if r == -1 && c == -1 {
+						return
+					}
 				}
 			}
-			fmt.Println(i, j)
 		}
 
 	}
 
 }
 
-func findNumber(currentX, currentY, maxRows, maxCol int, matrix [][]string, sum *int) (int, int) {
+func findNumber(symbolX, symbolY, currentX, currentY, maxRows, maxCol int, matrix [][]string, sum *int) (int, int) {
 
 	number := make([]string, 0) // Cambiamos a []string
 
@@ -83,30 +85,43 @@ func findNumber(currentX, currentY, maxRows, maxCol int, matrix [][]string, sum 
 	for i := currentY; i >= 0; i-- {
 		if matrix[currentX][i] >= "0" && matrix[currentX][i] <= "9" {
 			number = append([]string{matrix[currentX][i]}, number...)
-			fmt.Println(number)
+
 		} else {
 			break
 		}
 	}
 
 	// right
-	for i := currentY + 1; i < maxCol; i++ {
+	var i int
+	for i = currentY + 1; i < maxCol; i++ {
 		if matrix[currentX][i] >= "0" && matrix[currentX][i] <= "9" {
 			number = append(number, matrix[currentX][i])
-			fmt.Println(number)
 		} else {
 			break
 		}
 	}
 
-	// Concatenamos los elementos del slice de strings
+	//Convert form string[] to string to int
 	numberStr := strings.Join(number, "")
-	//fmt.Println(numberStr)
-	// Convertimos el string concatenado a un entero
+	fmt.Println(numberStr)
 	if n, err := strconv.Atoi(numberStr); err == nil {
 		*sum += n
 	} else {
-		//fmt.Println("Error al convertir a número:", err)
+		fmt.Println("Error al convertir a número:", err)
+	}
+
+	//update current X and Y
+	//check if updated X and Y are valid
+	if i <= (symbolY + 1) {
+		return currentX, i
+	}
+
+	currentY = symbolY - 1
+	currentX = currentX + 1
+
+	if currentX > symbolX+1 {
+
+		return -1, -1
 	}
 
 	return currentX, currentY
